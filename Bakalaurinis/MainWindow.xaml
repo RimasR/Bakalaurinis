@@ -1,0 +1,13 @@
+﻿<Window x:Class="Bakalaurinis.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Bakalaurinis"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="503.44" Width="676.497">
+    <Grid>
+        <Image x:Name="MainImage" HorizontalAlignment="Left" Height="420" Margin="10,30,0,0" VerticalAlignment="Top" Width="640"/>
+        <Button x:Name="VideoButton" Content="Choose video" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="85" Click="VideoButton_Click"/>
+    </Grid>
+</Window>
