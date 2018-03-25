@@ -5,9 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bakalaurinis"
         mc:Ignorable="d"
-        Title="MainWindow" Height="503.44" Width="676.497">
+        Title="MainWindow" Height="503.44" Width="968.497" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid>
         <Image x:Name="MainImage" HorizontalAlignment="Left" Height="420" Margin="10,30,0,0" VerticalAlignment="Top" Width="640"/>
         <Button x:Name="VideoButton" Content="Choose video" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="85" Click="VideoButton_Click"/>
+        <Slider x:Name="handSlider_H" HorizontalAlignment="Left" Margin="655,57,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_H_ValueChanged" Maximum="179" SmallChange="1"/>
+        <Slider x:Name="handSlider_S" HorizontalAlignment="Left" Margin="655,80,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_S_ValueChanged" Maximum="255" SmallChange="1"/>
+        <Slider x:Name="handSlider_V" HorizontalAlignment="Left" Margin="655,103,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_V_ValueChanged" Maximum="255" SmallChange="1"/>
+        <Slider x:Name="handSlider_high_H" HorizontalAlignment="Left" Margin="655,147,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_H_ValueChanged" Maximum="180" SmallChange="1"/>
+        <Slider x:Name="handSlider_high_S" HorizontalAlignment="Left" Margin="655,170,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_S_ValueChanged" Maximum="255" SmallChange="1"/>
+        <Slider x:Name="handSlider_high_V" HorizontalAlignment="Left" Margin="655,193,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_V_ValueChanged" Maximum="255" SmallChange="1"/>
+        <Label x:Name="low_H_Label" Content="" HorizontalAlignment="Left" Margin="848,52,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="low_S_Label" Content="" HorizontalAlignment="Left" Margin="848,75,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="low_V_Label" Content="" HorizontalAlignment="Left" Margin="848,98,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_H_Label" Content="" HorizontalAlignment="Left" Margin="843,142,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_S_Label" Content="" HorizontalAlignment="Left" Margin="843,165,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_V_Label" Content="" HorizontalAlignment="Left" Margin="843,188,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Button x:Name="CameraButton" Content="Camera" HorizontalAlignment="Left" Margin="110,5,0,0" VerticalAlignment="Top" Width="85" Click="CameraButton_Click"/>
     </Grid>
 </Window>
