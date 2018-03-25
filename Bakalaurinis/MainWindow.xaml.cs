@@ -87,7 +87,7 @@ namespace Bakalaurinis
         private VectorOfPoint DetectHand(Mat processedImage)
         {
             Mat copy = new Mat();
-            /*CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);*/
+            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);
             CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(0, 0, 225)), new ScalarArray(new MCvScalar(50, 190, 255)), copy);
             CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
