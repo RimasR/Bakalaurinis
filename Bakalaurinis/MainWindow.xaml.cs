@@ -6,21 +6,10 @@ using Emgu.CV.Util;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Bakalaurinis
 {
@@ -32,11 +21,23 @@ namespace Bakalaurinis
         private int low_H = 1;
         private int low_S = 1;
         private int low_V = 1;
-
         private int high_H = 1;
         private int high_S = 0;
         private int high_V = 0;
+
         private VideoCapture _videoCapture = null;
+
+        private bool ballIsInHand = false;
+        private int frames = 0;
+        private int handFrames = 0;
+        private int ballFrames = 0;
+
+        List<int> lastHalfSecondRadiuses = new List<int>();
+        CircleF lastFoundBall = new CircleF();
+        Mat lastFrame;
+        CircleF lastFrameBall = new CircleF();
+        CircleF lastFrameBallInHand = new CircleF();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -46,49 +47,86 @@ namespace Bakalaurinis
         {
             Mat result = mat.Clone();
             var processedImage = PreProcessImage(mat);
-            
+
             var detectedBall = DetectBall(processedImage);
-            
+
             var detectedHand = DetectHand(processedImage);
-            Mat isLegal = DetectFirstRule(detectedBall, detectedHand, result);
-            /*if (isLegal)
+            bool isLegal = DetectFirstRule(detectedBall, detectedHand, result);
+            if (isLegal)
             {
-                DetectSecondRule(detectedBalls, detectedHand, result);
-            }*/
+                DetectSecondRule(detectedBall, detectedHand, result);
+            }
 
             result = DrawObjects(detectedBall, detectedHand, mat);
-
+            lastFrame = mat;
+            lastFrameBall = detectedBall;
             return result;
         }
 
-        private void DetectSecondRule(List<CircleF> ball, VectorOfPoint hand, Mat image)
+        private void DetectSecondRule(CircleF ball, VectorOfPoint hand, Mat image)
         {
-            
         }
 
-        private Mat DetectFirstRule(CircleF ball, VectorOfPoint hand, Mat image)
+        private bool DetectFirstRule(CircleF ball, VectorOfPoint detectedHand, Mat image)
         {
-            Mat mat1 = new Mat(image.Rows, image.Cols, image.Depth, 1);
-            Mat mat2 = new Mat(image.Rows, image.Cols, image.Depth, 1);
-            
-            CvInvoke.Circle(mat1, System.Drawing.Point.Round(ball.Center), (int)ball.Radius, new Bgr(System.Drawing.Color.Cyan).MCvScalar, 3);
-            
-            if (hand.Size != 0)
+            Mat circle = new Mat(image.Rows, image.Cols, image.Depth, image.NumberOfChannels);
+            Mat hand = new Mat(image.Rows, image.Cols, image.Depth, image.NumberOfChannels);
+            circle.SetTo(new MCvScalar(0));
+            hand.SetTo(new MCvScalar(0));
+
+            int averageBallRadius = lastHalfSecondRadiuses.Count > 0 ? lastHalfSecondRadiuses.Max() : (int)ball.Radius;
+
+            if (ball.Radius > 0)
             {
-                var cont = new VectorOfVectorOfPoint(hand);
-                CvInvoke.DrawContours(mat2, cont, 0, new Bgr(System.Drawing.Color.Red).MCvScalar, 2);
+                CvInvoke.Circle(circle, System.Drawing.Point.Round(ball.Center), averageBallRadius, new Bgr(System.Drawing.Color.White).MCvScalar, -1);
             }
 
-            Mat mat = new Mat(image.Rows, image.Cols, image.Depth, 1);
-            CvInvoke.BitwiseAnd(mat1, mat2, mat);
-            return mat;
+            if (detectedHand.Size != 0)
+            {
+                var cont = new VectorOfVectorOfPoint(detectedHand);
+                VectorOfPoint hull = new VectorOfPoint();
+                CvInvoke.ConvexHull(detectedHand, hull, false, true);
+                cont = new VectorOfVectorOfPoint(hull);
+                CvInvoke.DrawContours(hand, cont, 0, new Bgr(System.Drawing.Color.White).MCvScalar, -1);
+            }
+
+            Mat res = new Mat(image.Rows, image.Cols, image.Depth, image.NumberOfChannels);
+            CvInvoke.BitwiseAnd(circle, hand, res);
+            CvInvoke.CvtColor(res, res, ColorConversion.Hsv2Bgr);
+            CvInvoke.CvtColor(res, res, ColorConversion.Bgr2Gray);
+            bool ballInHand = CvInvoke.CountNonZero(res) > 0;
+            /*double isInSideSouth = -1.0;
+            double isInSideNorth = -1.0;
+            double isInSideEast = -1.0;
+            double isInSideWest = -1.0;*/
+            /*if (detectedHand.Size != 0 && ball.Radius > 0)
+            {
+                isInSideSouth = CvInvoke.PointPolygonTest(detectedHand, new PointF(ball.Center.X, ball.Center.Y + ball.Radius), false);
+                isInSideNorth = CvInvoke.PointPolygonTest(detectedHand, new PointF(ball.Center.X, ball.Center.Y - ball.Radius), false);
+                isInSideEast = CvInvoke.PointPolygonTest(detectedHand, new PointF(ball.Center.X + ball.Radius, ball.Center.Y), false);
+                isInSideWest = CvInvoke.PointPolygonTest(detectedHand, new PointF(ball.Center.X - ball.Radius, ball.Center.Y), false);
+            }
+            if (isInSideSouth == 1 || isInSideSouth == 0 || isInSideNorth == 1 || isInSideNorth == 0 || isInSideEast == 1 || isInSideEast == 0 || isInSideWest == 1 || isInSideWest == 0)
+            {
+                ballInHand = true;
+            }
+            else
+            {
+                ballInHand = false;
+            }*/
+            if(ballInHand == true)
+            {
+                lastFrameBallInHand = ball;
+            }
+            ballIsInHand = ballInHand;
+            return ballInHand;
         }
 
         private VectorOfPoint DetectHand(Mat processedImage)
         {
             Mat copy = new Mat();
-            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);
-            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(0, 0, 225)), new ScalarArray(new MCvScalar(50, 190, 255)), copy);
+            /*CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);*/
+            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(2, 24, 138)), new ScalarArray(new MCvScalar(27, 139, 255)), copy);
             CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
 
@@ -106,6 +144,8 @@ namespace Bakalaurinis
                         biggestContour = contours[i];
                     }
                 }
+                CvInvoke.ApproxPolyDP(biggestContour, biggestContour, 0.0015, true);
+                handFrames++;
                 return biggestContour;
             }
             return new VectorOfPoint();
@@ -115,13 +155,24 @@ namespace Bakalaurinis
         {
             if (detectedBall.Radius > 0)
             {
-                CvInvoke.Circle(mat, System.Drawing.Point.Round(detectedBall.Center), (int)detectedBall.Radius, new Bgr(System.Drawing.Color.Red).MCvScalar, -1);
+                int averageBallRadius = lastHalfSecondRadiuses.Count > 0 ? lastHalfSecondRadiuses.Max() : (int)detectedBall.Radius;
+                CvInvoke.Circle(mat, System.Drawing.Point.Round(detectedBall.Center), averageBallRadius, new Bgr(System.Drawing.Color.Red).MCvScalar, -1);
             }
-            
+            else
+            {
+                if (lastFoundBall.Radius > 0 && lastFoundBall.Center.X != 0)
+                {
+                    int averageBallRadius = lastHalfSecondRadiuses.Count > 0 ? lastHalfSecondRadiuses.Max() : (int)detectedBall.Radius;
+                    CvInvoke.Circle(mat, System.Drawing.Point.Round(lastFoundBall.Center), averageBallRadius, new Bgr(System.Drawing.Color.Red).MCvScalar, -1);
+                }
+            }
+
             if (detectedHand.Size != 0)
             {
-                var cont = new VectorOfVectorOfPoint(detectedHand);
-                CvInvoke.DrawContours(mat, cont, 0, new Bgr(System.Drawing.Color.Cyan).MCvScalar, -1);
+                VectorOfPoint hull = new VectorOfPoint();
+                CvInvoke.ConvexHull(detectedHand, hull, false, true);
+                var cont = new VectorOfVectorOfPoint(hull);
+                CvInvoke.DrawContours(mat, cont, 0, new Bgr(System.Drawing.Color.Green).MCvScalar, 1);
             }
             return mat;
         }
@@ -129,8 +180,8 @@ namespace Bakalaurinis
         private CircleF DetectBall(Mat processedImage)
         {
             Mat copy = new Mat();
-            /*CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);*/
-            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(43, 0, 00)), new ScalarArray(new MCvScalar(121, 255, 255)), copy);
+            //CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);
+            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(98, 96, 154)), new ScalarArray(new MCvScalar(105, 143, 255)), copy);
             CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             /*var ball = CvInvoke.HoughCircles(copy, HoughType.Gradient, 3, 200, 400, 63);*/
@@ -149,10 +200,17 @@ namespace Bakalaurinis
                         biggestContour = contours[i];
                     }
                 }
+                ballFrames++;
             }
             if (biggestContour.Size != 0)
             {
                 var circle = CvInvoke.MinEnclosingCircle(biggestContour);
+                lastHalfSecondRadiuses.Add((int)circle.Radius);
+                if(lastHalfSecondRadiuses.Count > 15)
+                {
+                    lastHalfSecondRadiuses.RemoveAt(0);
+                }
+                lastFoundBall = circle;
                 return circle;
             }
 
@@ -166,16 +224,29 @@ namespace Bakalaurinis
             CvInvoke.GaussianBlur(copy, copy, new System.Drawing.Size(3, 3), 0);
             return copy;
         }
+
         private void _videoCapture_ImageGrabbed(object sender, EventArgs e)
         {
             try
             {
                 Mat mat = new Mat();
                 bool retrieved = _videoCapture.Retrieve(mat);
+                frames++;
                 mat = DetectServing(mat);
                 var realImage = ToBitmapSource(mat.ToImage<Bgr, byte>().Resize(640, 420, Inter.Linear));
                 this.Dispatcher.Invoke(() =>
                 {
+                    if (ballIsInHand)
+                    {
+                        ballIsInHandLabel.Content = "Yes";
+                    }
+                    else
+                    {
+                        ballIsInHandLabel.Content = "No";
+                    }
+                    frameLabel.Content = frames.ToString();
+                    ballLabel.Content = ballFrames.ToString();
+                    handLabel.Content = handFrames.ToString();
                     MainImage.Source = ToBitmapSource(mat.ToImage<Bgr, byte>()); //change to converted one.
                 });
             }
@@ -246,7 +317,6 @@ namespace Bakalaurinis
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void CameraButton_Click(object sender, RoutedEventArgs e)
@@ -258,6 +328,7 @@ namespace Bakalaurinis
             _videoCapture.ImageGrabbed += _videoCapture_ImageGrabbed;
             _videoCapture.Start();
         }
+
         private void VideoButton_Click(object sender, RoutedEventArgs e)
         {
             if (_videoCapture == null)
@@ -275,7 +346,7 @@ namespace Bakalaurinis
 
         [DllImport("gdi32")]
         private static extern int DeleteObject(IntPtr o);
-        
+
         public static BitmapSource ToBitmapSource(IImage image)
         {
             using (System.Drawing.Bitmap source = image.Bitmap)
@@ -292,7 +363,5 @@ namespace Bakalaurinis
                 return bs;
             }
         }
-
-
     }
 }

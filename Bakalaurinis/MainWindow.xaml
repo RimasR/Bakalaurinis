@@ -22,5 +22,13 @@
         <Label x:Name="high_S_Label" Content="" HorizontalAlignment="Left" Margin="843,165,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
         <Label x:Name="high_V_Label" Content="" HorizontalAlignment="Left" Margin="843,188,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
         <Button x:Name="CameraButton" Content="Camera" HorizontalAlignment="Left" Margin="110,5,0,0" VerticalAlignment="Top" Width="85" Click="CameraButton_Click"/>
+        <Label Content="Ball is in hand: " HorizontalAlignment="Left" Margin="655,237,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="ballIsInHandLabel" Content="False" HorizontalAlignment="Left" Margin="744,237,0,0" VerticalAlignment="Top"/>
+        <Label Content="Frames:" HorizontalAlignment="Left" Margin="666,277,0,0" VerticalAlignment="Top"/>
+        <Label Content="Ball frames:" HorizontalAlignment="Left" Margin="666,303,0,0" VerticalAlignment="Top"/>
+        <Label Content="Hand frames:" HorizontalAlignment="Left" Margin="666,329,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="frameLabel" Content="0" HorizontalAlignment="Left" Margin="756,277,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="ballLabel" Content="0" HorizontalAlignment="Left" Margin="756,303,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="handLabel" Content="0" HorizontalAlignment="Left" Margin="756,329,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>
