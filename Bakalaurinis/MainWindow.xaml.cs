@@ -54,7 +54,7 @@ namespace Bakalaurinis
             bool isLegal = DetectFirstRule(detectedBall, detectedHand, result);
             if (isLegal)
             {
-                DetectSecondRule(detectedBall, detectedHand, result);
+                DetectSecondRule(detectedBall, lastFoundBall, lastFrameBallInHand, detectedHand, result);
             }
 
             result = DrawObjects(detectedBall, detectedHand, mat);
@@ -63,8 +63,27 @@ namespace Bakalaurinis
             return result;
         }
 
-        private void DetectSecondRule(CircleF ball, VectorOfPoint hand, Mat image)
+        private void DetectSecondRule(CircleF currentFrameBall, CircleF lastFrameBall, CircleF lastFrameBallInHand, VectorOfPoint hand, Mat image)
         {
+            // compare last frame ball coordinates with current frame ball coordinates
+
+
+            // if y axis is highier in current frame - loop again
+            if (currentFrameBall.Center.Y > lastFrameBall.Center.Y)
+            {
+                return;
+            }
+
+            // if y axis is highier than when ball was in hand but lower that last frame - calculate height (last frame - last fame in hand
+            if (currentFrameBall.Center.Y < lastFrameBall.Center.Y && currentFrameBall.Center.Y > lastFrameBallInHand.Center.Y)
+            {
+                //lastFrameBall
+                return;
+            }
+            // if ball is not recognized for 1 second - count as failed pass - go to first rule.
+
+            // need logging
+
         }
 
         private bool DetectFirstRule(CircleF ball, VectorOfPoint detectedHand, Mat image)
