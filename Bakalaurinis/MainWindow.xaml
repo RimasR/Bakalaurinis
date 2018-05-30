@@ -5,30 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bakalaurinis"
         mc:Ignorable="d"
-        Title="MainWindow" Height="503.44" Width="968.497" Closing="Window_Closing" Loaded="Window_Loaded">
+        Title="MainWindow" Height="1080" Width="1920" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid>
-        <Image x:Name="MainImage" HorizontalAlignment="Left" Height="420" Margin="10,30,0,0" VerticalAlignment="Top" Width="640"/>
+        <Image x:Name="MainImage" HorizontalAlignment="Left" Height="991" Margin="10,30,0,0" VerticalAlignment="Top" Width="1512"/>
         <Button x:Name="VideoButton" Content="Choose video" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="85" Click="VideoButton_Click"/>
-        <Slider x:Name="handSlider_H" HorizontalAlignment="Left" Margin="655,57,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_H_ValueChanged" Maximum="179" SmallChange="1"/>
-        <Slider x:Name="handSlider_S" HorizontalAlignment="Left" Margin="655,80,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_S_ValueChanged" Maximum="255" SmallChange="1"/>
-        <Slider x:Name="handSlider_V" HorizontalAlignment="Left" Margin="655,103,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_V_ValueChanged" Maximum="255" SmallChange="1"/>
-        <Slider x:Name="handSlider_high_H" HorizontalAlignment="Left" Margin="655,147,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_H_ValueChanged" Maximum="180" SmallChange="1"/>
-        <Slider x:Name="handSlider_high_S" HorizontalAlignment="Left" Margin="655,170,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_S_ValueChanged" Maximum="255" SmallChange="1"/>
-        <Slider x:Name="handSlider_high_V" HorizontalAlignment="Left" Margin="655,193,0,0" VerticalAlignment="Top" Width="188" ValueChanged="handSlider_high_V_ValueChanged" Maximum="255" SmallChange="1"/>
-        <Label x:Name="low_H_Label" Content="" HorizontalAlignment="Left" Margin="848,52,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
-        <Label x:Name="low_S_Label" Content="" HorizontalAlignment="Left" Margin="848,75,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
-        <Label x:Name="low_V_Label" Content="" HorizontalAlignment="Left" Margin="848,98,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
-        <Label x:Name="high_H_Label" Content="" HorizontalAlignment="Left" Margin="843,142,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
-        <Label x:Name="high_S_Label" Content="" HorizontalAlignment="Left" Margin="843,165,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
-        <Label x:Name="high_V_Label" Content="" HorizontalAlignment="Left" Margin="843,188,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Slider x:Name="handSlider_H" HorizontalAlignment="Left" Margin="1601,57,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_H_ValueChanged" Maximum="179" SmallChange="1" Height="18"/>
+        <Slider x:Name="handSlider_S" HorizontalAlignment="Left" Margin="1601,80,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_S_ValueChanged" Maximum="255" SmallChange="1" Height="18"/>
+        <Slider x:Name="handSlider_V" HorizontalAlignment="Left" Margin="1601,103,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_V_ValueChanged" Maximum="255" SmallChange="1" Height="18"/>
+        <Slider x:Name="handSlider_high_H" HorizontalAlignment="Left" Margin="1601,146,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_high_H_ValueChanged" Maximum="180" SmallChange="1" Height="18"/>
+        <Slider x:Name="handSlider_high_S" HorizontalAlignment="Left" Margin="1601,169,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_high_S_ValueChanged" Maximum="255" SmallChange="1" Height="18"/>
+        <Slider x:Name="handSlider_high_V" HorizontalAlignment="Left" Margin="1601,192,0,0" VerticalAlignment="Top" Width="187" ValueChanged="handSlider_high_V_ValueChanged" Maximum="255" SmallChange="1" Height="18"/>
+        <Label x:Name="low_H_Label" Content="" HorizontalAlignment="Left" Margin="1793,52,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="low_S_Label" Content="" HorizontalAlignment="Left" Margin="1793,75,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="low_V_Label" Content="" HorizontalAlignment="Left" Margin="1793,98,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_H_Label" Content="" HorizontalAlignment="Left" Margin="1788,141,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_S_Label" Content="" HorizontalAlignment="Left" Margin="1788,164,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
+        <Label x:Name="high_V_Label" Content="" HorizontalAlignment="Left" Margin="1788,187,0,0" VerticalAlignment="Top" Height="23" Width="40"/>
         <Button x:Name="CameraButton" Content="Camera" HorizontalAlignment="Left" Margin="110,5,0,0" VerticalAlignment="Top" Width="85" Click="CameraButton_Click"/>
-        <Label Content="Ball is in hand: " HorizontalAlignment="Left" Margin="655,237,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ballIsInHandLabel" Content="False" HorizontalAlignment="Left" Margin="744,237,0,0" VerticalAlignment="Top"/>
-        <Label Content="Frames:" HorizontalAlignment="Left" Margin="666,277,0,0" VerticalAlignment="Top"/>
-        <Label Content="Ball frames:" HorizontalAlignment="Left" Margin="666,303,0,0" VerticalAlignment="Top"/>
-        <Label Content="Hand frames:" HorizontalAlignment="Left" Margin="666,329,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="frameLabel" Content="0" HorizontalAlignment="Left" Margin="756,277,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ballLabel" Content="0" HorizontalAlignment="Left" Margin="756,303,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="handLabel" Content="0" HorizontalAlignment="Left" Margin="756,329,0,0" VerticalAlignment="Top"/>
+        <Label Content="Ball is in hand: " HorizontalAlignment="Left" Margin="1601,235,0,0" VerticalAlignment="Top" Height="27" Width="89"/>
+        <Label x:Name="ballIsInHandLabel" Content="False" HorizontalAlignment="Left" Margin="1690,235,0,0" VerticalAlignment="Top" Height="27" Width="36"/>
+        <Label Content="Frames:" HorizontalAlignment="Left" Margin="1612,275,0,0" VerticalAlignment="Top" Height="26" Width="50"/>
+        <Label Content="Ball frames:" HorizontalAlignment="Left" Margin="1612,301,0,0" VerticalAlignment="Top" Height="26" Width="70"/>
+        <Label Content="Hand frames:" HorizontalAlignment="Left" Margin="1612,327,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
+        <Label x:Name="frameLabel" Content="0" HorizontalAlignment="Left" Margin="1702,275,0,0" VerticalAlignment="Top" Height="26" Width="72"/>
+        <Label x:Name="ballLabel" Content="0" HorizontalAlignment="Left" Margin="1702,301,0,0" VerticalAlignment="Top" Height="26" Width="72"/>
+        <Label x:Name="handLabel" Content="0" HorizontalAlignment="Left" Margin="1702,327,0,0" VerticalAlignment="Top" Height="26" Width="72"/>
+        <Label Content="Ball height:" HorizontalAlignment="Left" Margin="1601,254,0,0" VerticalAlignment="Top" Height="26" Width="89"/>
+        <Label x:Name="ballHeightLabel" Content="0" HorizontalAlignment="Left" Margin="1690,254,0,0" VerticalAlignment="Top" Height="26" Width="36"/>
+        <Label Content="Ball X:" HorizontalAlignment="Left" Margin="1601,356,0,0" VerticalAlignment="Top" Height="27" Width="89"/>
+        <Label x:Name="ballXLabel" Content="0" HorizontalAlignment="Left" Margin="1690,356,0,0" VerticalAlignment="Top" Height="27" Width="36"/>
+        <Label Content="Ball Y:" HorizontalAlignment="Left" Margin="1601,370,0,0" VerticalAlignment="Top" Height="27" Width="89"/>
+        <Label x:Name="ballYLabel" Content="0" HorizontalAlignment="Left" Margin="1690,370,0,0" VerticalAlignment="Top" Height="27" Width="36"/>
+        <Label Content="Rule state:" HorizontalAlignment="Left" Margin="1601,218,0,0" VerticalAlignment="Top" Height="26" Width="89"/>
+        <Label x:Name="ruleStateLabel" Content="NaN" HorizontalAlignment="Left" Margin="1690,218,0,0" VerticalAlignment="Top" Height="26" Width="36"/>
+        <TextBlock x:Name="logBlock" HorizontalAlignment="Left" Margin="1601,402,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="597" Width="232" Text="initial"/>
     </Grid>
 </Window>

@@ -24,42 +24,68 @@ namespace Bakalaurinis
         private int high_H = 1;
         private int high_S = 0;
         private int high_V = 0;
-
+        private int ballCoordX = 0;
+        private int ballCoordY = 0;
         private VideoCapture _videoCapture = null;
-
+        private float recordedHeight = 0;
         private bool ballIsInHand = false;
         private int frames = 0;
         private int handFrames = 0;
         private int ballFrames = 0;
-
-        List<int> lastHalfSecondRadiuses = new List<int>();
-        CircleF lastFoundBall = new CircleF();
-        Mat lastFrame;
-        CircleF lastFrameBall = new CircleF();
-        CircleF lastFrameBallInHand = new CircleF();
+        private InitiateRule rule = InitiateRule.FirstRule;
+        private List<int> lastHalfSecondRadiuses = new List<int>();
+        private CircleF lastFoundBall = new CircleF();
+        private Mat lastFrame;
+        private CircleF lastFrameBall = new CircleF();
+        private CircleF lastFrameBallInHand = new CircleF();
+        private bool isLastFrameBallInHand = false;
+        private LineSegment2D line;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
+        public enum InitiateRule
+        {
+            FirstRule = 0,
+            SecondRule = 1,
+            Waiting = 2
+        }
+
         private Mat DetectServing(Mat mat)
         {
+            mat = mat.ToImage<Bgr, byte>().Rotate(90, new Bgr(0, 0, 0)).Mat;
             Mat result = mat.Clone();
             var processedImage = PreProcessImage(mat);
-
             var detectedBall = DetectBall(processedImage);
-
             var detectedHand = DetectHand(processedImage);
-            bool isLegal = DetectFirstRule(detectedBall, detectedHand, result);
+
+            switch (rule)
+            {
+                case InitiateRule.FirstRule:
+                    DetectFirstRule(detectedBall, detectedHand, result);
+                    break;
+
+                case InitiateRule.SecondRule:
+                    DetectSecondRule(detectedBall, lastFrameBall, lastFrameBallInHand, detectedHand, result);
+                    break;
+
+                default:
+                    rule = InitiateRule.FirstRule;
+
+                    break;
+            }
+
+            /*bool isLegal = DetectFirstRule(detectedBall, detectedHand, result);
             if (isLegal)
             {
                 DetectSecondRule(detectedBall, lastFoundBall, lastFrameBallInHand, detectedHand, result);
-            }
+            }*/
 
             result = DrawObjects(detectedBall, detectedHand, mat);
             lastFrame = mat;
-            lastFrameBall = detectedBall;
+            lastFrameBall = detectedBall.Center.X != 0 ? detectedBall : lastFrameBall;
             return result;
         }
 
@@ -67,23 +93,41 @@ namespace Bakalaurinis
         {
             // compare last frame ball coordinates with current frame ball coordinates
 
-
             // if y axis is highier in current frame - loop again
-            if (currentFrameBall.Center.Y > lastFrameBall.Center.Y)
+            if (currentFrameBall.Center.Y < lastFrameBall.Center.Y)
             {
+                //recordedHeight = ((lastFrameBallInHand.Center.Y - currentFrameBall.Center.Y) * 2) / lastFrameBall.Radius;
+                return;
+            }
+
+            if (currentFrameBall.Center.Y > lastFrameBall.Center.Y && currentFrameBall.Center.Y > lastFrameBallInHand.Center.Y)
+            {
+                rule = InitiateRule.FirstRule;
+                recordedHeight = -1;
+                //recordedHeight = ((lastFrameBallInHand.Center.Y - currentFrameBall.Center.Y) * 2) / lastFrameBall.Radius;
                 return;
             }
 
             // if y axis is highier than when ball was in hand but lower that last frame - calculate height (last frame - last fame in hand
-            if (currentFrameBall.Center.Y < lastFrameBall.Center.Y && currentFrameBall.Center.Y > lastFrameBallInHand.Center.Y)
+            if (currentFrameBall.Center.Y > lastFrameBall.Center.Y && currentFrameBall.Center.Y < lastFrameBallInHand.Center.Y)
             {
-                //lastFrameBall
+                float height = lastFrameBallInHand.Center.Y - lastFrameBall.Center.Y;
+                if (height >= (lastFrameBall.Radius * 2 * 4))
+                {
+                    line = new LineSegment2D(new System.Drawing.Point(
+                        (int)lastFrameBall.Center.X, 
+                        (int)lastFrameBall.Center.Y),
+                        new System.Drawing.Point((int)lastFrameBallInHand.Center.X,
+                        (int)lastFrameBallInHand.Center.Y)
+                        );
+                }
+                recordedHeight = (height * 2) / lastFrameBall.Radius;
+                rule = InitiateRule.FirstRule;
                 return;
             }
             // if ball is not recognized for 1 second - count as failed pass - go to first rule.
 
             // need logging
-
         }
 
         private bool DetectFirstRule(CircleF ball, VectorOfPoint detectedHand, Mat image)
@@ -133,9 +177,13 @@ namespace Bakalaurinis
             {
                 ballInHand = false;
             }*/
-            if(ballInHand == true)
+            if (ballInHand == true)
             {
                 lastFrameBallInHand = ball;
+            }
+            if (ballInHand == false && ballIsInHand == true)
+            {
+                rule = InitiateRule.SecondRule;
             }
             ballIsInHand = ballInHand;
             return ballInHand;
@@ -144,10 +192,11 @@ namespace Bakalaurinis
         private VectorOfPoint DetectHand(Mat processedImage)
         {
             Mat copy = new Mat();
+            CvInvoke.CvtColor(processedImage, copy, ColorConversion.Bgr2Hsv);
             /*CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);*/
-            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(2, 24, 138)), new ScalarArray(new MCvScalar(27, 139, 255)), copy);
-            CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
-            CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(0, 63, 59)), new ScalarArray(new MCvScalar(19, 228, 247)), copy);
+            CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 5, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
+            CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 5, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
 
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
             VectorOfPoint biggestContour = new VectorOfPoint();
@@ -172,6 +221,14 @@ namespace Bakalaurinis
 
         private Mat DrawObjects(CircleF detectedBall, VectorOfPoint detectedHand, Mat mat)
         {
+            if (detectedHand.Size != 0)
+            {
+                VectorOfPoint hull = new VectorOfPoint();
+                CvInvoke.ConvexHull(detectedHand, hull, false, true);
+                var cont = new VectorOfVectorOfPoint(hull);
+                CvInvoke.DrawContours(mat, cont, 0, new Bgr(System.Drawing.Color.Green).MCvScalar, -1);
+            }
+
             if (detectedBall.Radius > 0)
             {
                 int averageBallRadius = lastHalfSecondRadiuses.Count > 0 ? lastHalfSecondRadiuses.Max() : (int)detectedBall.Radius;
@@ -185,22 +242,21 @@ namespace Bakalaurinis
                     CvInvoke.Circle(mat, System.Drawing.Point.Round(lastFoundBall.Center), averageBallRadius, new Bgr(System.Drawing.Color.Red).MCvScalar, -1);
                 }
             }
-
-            if (detectedHand.Size != 0)
+            if (line.P1.X != 0)
             {
-                VectorOfPoint hull = new VectorOfPoint();
-                CvInvoke.ConvexHull(detectedHand, hull, false, true);
-                var cont = new VectorOfVectorOfPoint(hull);
-                CvInvoke.DrawContours(mat, cont, 0, new Bgr(System.Drawing.Color.Green).MCvScalar, 1);
+                CvInvoke.Line(mat, new System.Drawing.Point(line.P1.X, line.P1.Y), new System.Drawing.Point(line.P2.X, line.P2.Y), new Bgr(System.Drawing.Color.Yellow).MCvScalar, 3);
             }
+            //CvInvoke.CvtColor(mat, mat, ColorConversion.Bgr2Hsv);
+            //CvInvoke.InRange(mat, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), mat);
             return mat;
         }
 
         private CircleF DetectBall(Mat processedImage)
         {
             Mat copy = new Mat();
+            CvInvoke.CvtColor(processedImage, copy, ColorConversion.Bgr2Hsv);
             //CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(low_H, low_S, low_V)), new ScalarArray(new MCvScalar(high_H, high_S, high_V)), copy);
-            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(98, 96, 154)), new ScalarArray(new MCvScalar(105, 143, 255)), copy);
+            CvInvoke.InRange(processedImage, new ScalarArray(new MCvScalar(94, 130, 91)), new ScalarArray(new MCvScalar(122, 217, 255)), copy);
             CvInvoke.Erode(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             CvInvoke.Dilate(copy, copy, null, new System.Drawing.Point(-1, -1), 1, BorderType.Constant, CvInvoke.MorphologyDefaultBorderValue);
             /*var ball = CvInvoke.HoughCircles(copy, HoughType.Gradient, 3, 200, 400, 63);*/
@@ -225,11 +281,13 @@ namespace Bakalaurinis
             {
                 var circle = CvInvoke.MinEnclosingCircle(biggestContour);
                 lastHalfSecondRadiuses.Add((int)circle.Radius);
-                if(lastHalfSecondRadiuses.Count > 15)
+                if (lastHalfSecondRadiuses.Count > 15)
                 {
                     lastHalfSecondRadiuses.RemoveAt(0);
                 }
                 lastFoundBall = circle;
+                ballCoordX = (int)circle.Center.X;
+                ballCoordY = (int)circle.Center.Y;
                 return circle;
             }
 
@@ -255,6 +313,27 @@ namespace Bakalaurinis
                 var realImage = ToBitmapSource(mat.ToImage<Bgr, byte>().Resize(640, 420, Inter.Linear));
                 this.Dispatcher.Invoke(() =>
                 {
+                    if (rule == InitiateRule.FirstRule)
+                    {
+                        logBlock.Text = rule.ToString() + "\n" + logBlock.Text;
+                    }
+                    if (recordedHeight >= 16 && recordedHeight > 0)
+                    {
+                        logBlock.Text = $"Success! Ball height was {recordedHeight} - rule passed\n" + logBlock.Text;
+                    }
+                    if (recordedHeight < 16 && recordedHeight > 0)
+                    {
+                        logBlock.Text = $" Failure! Ball was not high enough: {recordedHeight}\n" + logBlock.Text;
+                    }
+                    if (recordedHeight < 0 )
+                    {
+                        logBlock.Text = $"Ball was thrown down. \n" + logBlock.Text;
+                        recordedHeight = 0;
+                    }
+                    if (rule == InitiateRule.SecondRule)
+                    {
+                        logBlock.Text = $"Waiting for ball to go up...\n" + logBlock.Text;
+                    }
                     if (ballIsInHand)
                     {
                         ballIsInHandLabel.Content = "Yes";
@@ -263,6 +342,10 @@ namespace Bakalaurinis
                     {
                         ballIsInHandLabel.Content = "No";
                     }
+                    ruleStateLabel.Content = rule.ToString();
+                    ballXLabel.Content = ballCoordX.ToString();
+                    ballYLabel.Content = ballCoordY.ToString();
+                    ballHeightLabel.Content = recordedHeight.ToString();
                     frameLabel.Content = frames.ToString();
                     ballLabel.Content = ballFrames.ToString();
                     handLabel.Content = handFrames.ToString();
@@ -353,7 +436,7 @@ namespace Bakalaurinis
             if (_videoCapture == null)
             {
                 OpenFileDialog ofd = new OpenFileDialog();
-                ofd.Filter = "Video Files |*.mov";
+                ofd.Filter = "Video Files |*.mov;*.mp4";
                 if (ofd.ShowDialog() == true)
                 {
                     _videoCapture = new VideoCapture(ofd.FileName);
